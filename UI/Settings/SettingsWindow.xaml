@@ -1,0 +1,21 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:UI="clr-namespace:zSnap.UI" x:Class="zSnap.UI.Settings.SettingsWindow"
+        Title="Preferences" Height="456" Width="288" Foreground="#FF444444" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" SizeToContent="WidthAndHeight" Icon="/zSnap;component/Resources/zSnap_ico_p.ico">
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo/>
+    </Window.TaskbarItemInfo>
+    <Grid Margin="0,0,-1,0" SnapsToDevicePixels="True">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="288"/>
+        </Grid.ColumnDefinitions>
+        <Rectangle Fill="#FFF0F0F0" Margin="-11,96,0,-11" Stroke="#FFCCCCCC"/>
+
+        <UI:ImageButton x:Name="General" HorizontalAlignment="Left" VerticalAlignment="Top" Height="96" Width="96" Source="/zSnap;component/Resources/zSnap_settings_general_b.png"/>
+        <UI:ImageButton x:Name="Network" HorizontalAlignment="Left" VerticalAlignment="Top" Height="96" Width="96" Margin="96,0,0,0" Source="/zSnap;component/Resources/zSnap_settings_network_b.png"/>
+        <UI:ImageButton x:Name="About" HorizontalAlignment="Left" VerticalAlignment="Top" Height="96" Width="96" Margin="192,0,0,0" Source="/zSnap;component/Resources/zSnap_settings_about_b.png"/>
+        <ContentControl x:Name="SettingsPage" Content="" HorizontalAlignment="Left" Margin="0,96,0,0" VerticalAlignment="Top" Height="332" Width="288"/>
+
+    </Grid>
+</Window>

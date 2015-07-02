@@ -1,0 +1,12 @@
+﻿<UserControl x:Class="zSnap.API.Notification.SuccessNotificationPreset"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300" Width="256" Height="112">
+    <Grid HorizontalAlignment="Left" Height="112" VerticalAlignment="Top" Width="256">
+        <Rectangle Fill="#FF5D9730" HorizontalAlignment="Left" Height="112" VerticalAlignment="Top" Width="256" RenderTransformOrigin="-0.183,0.29"/>
+        <TextBlock x:Name="TextBlock" Margin="10,10,20,10" TextWrapping="Wrap" Foreground="White" FontSize="14"/>
+    </Grid>
+</UserControl>

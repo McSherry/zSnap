@@ -1,0 +1,24 @@
+﻿<Window x:Class="zSnap.UI.ImageLogWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Image Log" Height="299" Width="420" ResizeMode="NoResize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" PreviewKeyDown="KeyDownHandler" Loaded="LoadedHandler" ShowInTaskbar="False">
+    <Grid Background="WhiteSmoke">
+        <ListView x:Name="LogList" Margin="10,10,10,0" Height="224" Width="394" VerticalAlignment="Top">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Uploaded" DisplayMemberBinding="{Binding Path=Uploaded}"/>
+                    <GridViewColumn Header="Service" DisplayMemberBinding="{Binding Path=Service}"/>
+                    <GridViewColumn Header="URI" DisplayMemberBinding="{Binding Path=URI}"/>
+                </GridView>
+            </ListView.View>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <EventSetter Event="MouseDoubleClick" Handler="logItemDblClickHandler" />
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
+        <Button Content="Close" Margin="325,239,10,10" IsCancel="True"/>
+        <Button Content="Clear" HorizontalAlignment="Left" Margin="10,240,0,9" Width="75" Click="ClearClickedHandler"/>
+
+    </Grid>
+</Window>

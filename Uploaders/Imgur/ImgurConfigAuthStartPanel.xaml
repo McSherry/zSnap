@@ -1,0 +1,10 @@
+﻿<UserControl x:Class="zSnap.Uploaders.Imgur.ImgurConfigAuthStartPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" Height="40" Width="204">
+    <Grid>
+        <Button x:Name="AuthButton" Content="Authenticate" Margin="10,9" Click="AuthButtonClicked"/>
+    </Grid>
+</UserControl>

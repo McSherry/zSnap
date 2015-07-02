@@ -1,0 +1,24 @@
+﻿<UserControl x:Class="zSnap.UI.Settings.NetworkSettings"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300" Width="288" Height="332">
+    <Grid>
+        <GroupBox Header="Service" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="268" Height="103" BorderBrush="#FFBBBBBB">
+            <Grid HorizontalAlignment="Left" Height="78" VerticalAlignment="Top" Width="256">
+                <ComboBox x:Name="HostSelect" VerticalAlignment="Top" Margin="108,16,10,0" VerticalContentAlignment="Center"/>
+                <Label Content="Hosting Service" HorizontalAlignment="Left" Margin="10,16,0,0" VerticalAlignment="Top" Width="93" Height="22" VerticalContentAlignment="Stretch" Padding="5,3,5,0"/>
+                <Button x:Name="HostConfigure" Content="Configure Host" HorizontalAlignment="Left" Margin="108,46,0,0" VerticalAlignment="Top" Width="138" IsEnabled="False"/>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Tasks" HorizontalAlignment="Left" Margin="10,118,0,0" VerticalAlignment="Top" Width="268" Height="62" BorderBrush="#FFBBBBBB">
+            <Grid>
+                <CheckBox x:Name="CheckUpdates" Content="Check for Updates Automatically" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" IsChecked="True"/>
+            </Grid>
+        </GroupBox>
+        <Button x:Name="UpdateCheck" Content="Check for Update" HorizontalAlignment="Left" Margin="142,300,0,10" Width="136" Click="UpdateCheck_Click"/>
+
+    </Grid>
+</UserControl>

@@ -1,0 +1,10 @@
+﻿<UserControl x:Class="zSnap.Uploaders.picBox.picBoxConfEnabledPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
+    <Grid Height="66" Width="236">
+        <Button x:Name="Authenticate" Content="Authenticate" Margin="24,22" Click="AuthClickedHandler"/>
+
+    </Grid>
+</UserControl>
