@@ -47,6 +47,7 @@ namespace zSnap.Uploaders.HttpPost
                 }
                 var ms = new MemoryStream();
                 Image.Save(ms, ImageFormat.Png);
+                ms.Position = 0;
                 form.Add(new StreamContent(ms), "screenshot", RandomString() + ".png");
                 var response = client.PostAsync(Configuration.Destination, form).Result;
 
