@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2014-2015 (c) Liam McSherry <mcsherry.liam@gmail.com>
+ * Copyright 2014-2016 (c) Liam McSherry <mcsherry.liam@gmail.com>
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("RTM")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("zSnap Screenshot Utility")]
-[assembly: AssemblyCopyright("Copyright 2014-2015 © Liam McSherry")]
+[assembly: AssemblyCopyright("Copyright 2014-2016 © Liam McSherry")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

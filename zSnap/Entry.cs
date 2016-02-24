@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2014-2015 (c) Liam McSherry <mcsherry.liam@gmail.com>
+ * Copyright 2014-2016 (c) Liam McSherry <mcsherry.liam@gmail.com>
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,6 +162,7 @@ namespace zSnap
         {
             // Windows XP is NT 5.x
             // Windows Vista, 7, 8, and 8.1 are NT 6.x
+            // Windows 10 is NT 10.0
             if (Environment.OSVersion.Version.Major < 6)
             {
                 MessageBox.Show(
