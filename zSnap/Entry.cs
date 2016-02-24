@@ -148,7 +148,7 @@ namespace zSnap
                 .Where(f => f.FieldType == typeof(string));
 
             if (keys.Count() == 0 ||
-                keys.Any(f => String.IsNullOrEmpty((string)f.GetValue(null))))
+                keys.Any(f => String.IsNullOrEmpty(f.GetValue(null).ToString())))
             {
                 throw new ApplicationException(
                     "One or more API keys is missing."
