@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2014-2015 (c) Johan Geluk <johan@jgeluk.net>
+ * Copyright 2014-2016 (c) Johan Geluk <johan@jgeluk.net>
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,8 +56,13 @@ namespace zSnap.Uploaders.HttpPost
             set { storageNamespace["useBasicAuth"] = value.ToString(); }
         }
 
+
         // The server to which data should be sent
         public static string Destination { get { return storageNamespace["destination"]; } set { storageNamespace["destination"] = value; } }
+
+        // The method that should be used for uploading data
+        public static string UploadMethod { get { return storageNamespace["uploadMethod"]; } set { storageNamespace["uploadMethod"] = value; } }
+
 
         // if true, attempts to parse the response using a user-supplied regex string
         public static bool UseRegex
@@ -79,5 +84,11 @@ namespace zSnap.Uploaders.HttpPost
         }
 
         public static string Regex { get { return storageNamespace["regex"]; } set { storageNamespace["regex"] = value; } }
+
+        public static string CustomUrl { get { return storageNamespace["customUrl"]; } set { storageNamespace["customUrl"] = value; } }
+
+        // The method to be used to determine the URL
+        public static string ImageUrlMethod { get { return storageNamespace["imageUrl"]; } set { storageNamespace["imageUrl"] = value; } }
+
     }
 }
