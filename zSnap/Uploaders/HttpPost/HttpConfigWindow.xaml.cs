@@ -62,7 +62,7 @@ namespace zSnap.Uploaders.HttpPost
         {
             var v = UrlFromReponse.IsChecked.GetValueOrDefault();
             UseRegexCheckBox.IsEnabled = v;
-            RegexTBox.IsEnabled = v;
+            RegexTBox.IsEnabled = v && UseRegexCheckBox.IsChecked.GetValueOrDefault();
 
             UrlTBox.IsEnabled = CustomUrl.IsChecked.GetValueOrDefault();
         }
