@@ -98,8 +98,6 @@ namespace zSnap
         public static bool PreventNotifyDisplay { get; set; }
         internal static event Action PreventNotifyClick;
 
-        private static System.Timers.Timer GCTimer;
-
         static Entry()
         {
             #region Notification Icon setup
@@ -152,12 +150,6 @@ namespace zSnap
             DefaultSettings.Lock();
             #endregion
 
-            #region Set up garbage collector timer
-            GCTimer = new System.Timers.Timer(1000);
-            GCTimer.Elapsed += (s, e) => GC.Collect(2);
-            GCTimer.Start();
-            #endregion
-
             #region Set up loading icon timer
             LoadingTimer = new System.Timers.Timer(400);
             LoadingTimer.Elapsed += (s, e) =>
@@ -177,9 +169,13 @@ namespace zSnap
             if (keys.Count() == 0 ||
                 keys.Any(f => String.IsNullOrEmpty(f.GetValue(null).ToString())))
             {
-                throw new ApplicationException(
-                    "One or more API keys is missing."
-                    );
+                MessageBox.Show(
+                    "One or more API keys is not defined.",
+                    "Missing API Keys",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                Environment.Exit(-1);
             }
             #endregion
         }
@@ -223,38 +219,34 @@ namespace zSnap
             }
             #endregion
 
-            #region Initial update check
+            #region Initial update check + set up timer
             bool doCheckUpdates;
-            if (!lNs.RetrieveSafe<bool>(SETTING_UPDATES, out doCheckUpdates))
+            if (!lNs.RetrieveSafe(SETTING_UPDATES, out doCheckUpdates))
             {
                 lNs[SETTING_UPDATES] = DefaultSettings[SETTING_UPDATES];
                 doCheckUpdates = bool.Parse(DefaultSettings[SETTING_UPDATES]);
             }
+            
 
-            if (doCheckUpdates)
-                _checkUpdateAndPrompt();
-
-            #endregion
-            #region Set up update timer
-            UpdateTimer = new System.Timers.Timer(60 * 30 * 1000); // 30min in ms
+            UpdateTimer = new System.Timers.Timer(1000 * 60 * 30); // 30min in ms
             UpdateTimer.Elapsed += (s, e) => NotifyContext.Dispatcher.Invoke(() =>
             {
-                Tuple<Uri, Uri, Uri> uris;
-                if (Metadata.CheckNewVersion(out uris) && Interop.InternetCheckConnection())
-                {
-                    var upWin = new UI.UpdateAvailableDisplayWindow(uris);
+                // Stop the timer so we don't prompt an absent user (who won't
+                // close the window) multiple times.
+                UpdateTimer.Stop();
 
-                    var result = upWin.ShowDialog();
-
-                    if (!result ?? false)
-                    {
-                        UpdateTimer.Stop();
-                    }
-                }
+                // We don't need to do anything else here.
+                //
+                // Either the user accepts the update and the program closes, or
+                // the user rejects the update and we don't restart the timer so
+                // that we don't bother them.
             });
 
             if (doCheckUpdates)
+            {
+                _checkUpdateAndPrompt();
                 UpdateTimer.Start();
+            }
             #endregion
 
             NotifyContext = new UI.NotificationContextWindow();

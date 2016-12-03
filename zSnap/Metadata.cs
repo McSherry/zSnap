@@ -190,7 +190,9 @@ namespace zSnap
     }
 
     /// <summary>
-    /// A class containing metadata about zSnap.
+    /// <para>
+    /// A class providing metadata about zSnap.
+    /// </para>
     /// </summary>
     public static class Metadata
     {
@@ -237,31 +239,48 @@ namespace zSnap
 
         });
 
+        // Set major/minor/patch to 1.99.0 to test update checking.
+
         /// <summary>
-        /// The current major version, where X in X.Y.Z-Q is the major version.
+        /// <para>
+        /// The current major version.
+        /// </para>
         /// </summary>
         public static int MajorVersion => 1;
         /// <summary>
-        /// The current minor version, where Y in X.Y.Z-Q is the minor version.
+        /// <para>
+        /// The current minor version.
+        /// </para>
         /// </summary>
-        public static int MinorVersion => 99; // 99 is the debug value
+        public static int MinorVersion => 99;
         /// <summary>
-        /// The current patch/revision version, where Z in X.Y.Z-Q is the patch/revision version.
+        /// <para>
+        /// The current patch version.
+        /// </para>
         /// </summary>
         public static int PatchVersion => 0;
+
         /// <summary>
-        /// The qualifiers appended to the end of the version string, where Q in X.Y.Z-Q is the qualifier.
+        /// <para>
+        /// The qualifiers appended to the version string to indicate a
+        /// pre-release version.
+        /// </para>
         /// </summary>
         public static string[] Qualifiers => new string[0];
         /// <summary>
-        /// Any additional information about the current build.
+        /// <para>
+        /// The build information appended to the version string.
+        /// </para>
         /// </summary>
         public static string BuildInformation => String.Empty;
+
         /// <summary>
-        /// The full version string, including all versions and qualifiers.
+        /// <para>
+        /// The current full version string, including all numbers, qualifiers,
+        /// and build information.
+        /// </para>
         /// </summary>
         public static string FullVersionString => _verString.Value;
-
         /// <summary>
         /// <para>
         /// A unique hash representing the current version.
@@ -339,10 +358,20 @@ namespace zSnap
         }
 
         /// <summary>
+        /// <para>
         /// Checks whether an update is available for this version.
+        /// </para>
         /// </summary>
-        /// <param name="URIs">A reference parameter used to output the URIs of resources. Archive URI first, installer second, release notes last.</param>
-        /// <returns>True if an update is available, false if otherwise or if an error occurs.</returns>
+        /// <param name="URIs">
+        /// <para>
+        /// A reference parameter used to output the URIs of update resources.
+        /// </para>
+        /// </param>
+        /// <returns>
+        /// <para>
+        /// True if an update is available, false if not or if an error occurs.
+        /// </para>
+        /// </returns>
         [Obsolete(message: "Use Metadata.CheckNewVersion(out UpdateInfo) instead.",
                   error:   false)]
         public static bool CheckNewVersion(out Tuple<Uri, Uri, Uri> URIs)
@@ -407,9 +436,15 @@ namespace zSnap
             }
         }
         /// <summary>
+        /// <para>
         /// Checks whether an update is available for this version.
+        /// </para>
         /// </summary>
-        /// <returns>True if an update is available, false if otherwise or if an error occurs.</returns>
+        /// <returns>
+        /// <para>
+        /// True if an update is available, false if not or if an error occurs.
+        /// </para>
+        /// </returns>
         [Obsolete(message: "Use Metadata.CheckNewVersion(out UpdateInfo) instead.",
                   error: false)]
         public static bool CheckNewVersion()
