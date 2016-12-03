@@ -30,7 +30,7 @@
         <GroupBox x:Name="UrlGroupBox"  Header="Image URL"  Margin="10,220,10,0" BorderBrush="#FFBBBBBB" Height="180" VerticalAlignment="Top">
             <Grid Margin="0">
                 <RadioButton x:Name="UrlFromReponse" Content="From response" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,10,0,0" Checked="ImageUrlMethodChangedHandler"/>
-                <CheckBox x:Name="UseRegexCheckBox" Content="Use a Regex to parse the URL" HorizontalAlignment="Left" Margin="20,30,0,0" VerticalAlignment="Top" Checked="RegexCheckedHandler" Unchecked="RegexUncheckedHandler"/>
+                <CheckBox x:Name="UseRegexCheckBox" Content="Use a Regex to parse the response" HorizontalAlignment="Left" Margin="20,30,0,0" VerticalAlignment="Top" Checked="RegexCheckedHandler" Unchecked="RegexUncheckedHandler"/>
                 <Label Content="Regex" HorizontalAlignment="Left" Margin="20,50,0,0" VerticalAlignment="Top" Foreground="#FF444444" Height="23" Padding="5,3,5,0" ToolTip="Use a regular expression to extract the image URL from the response string. The URL should be placed within a named capturing group, the name of which should be 'Url'."/>
                 <TextBox x:Name="RegexTBox" Height="23" Margin="70,50,10,0" VerticalAlignment="Top" ToolTip="Use a regular expression to extract the image URL from the response string. The URL should be placed within a named capturing group, the name of which should be 'Url'." />
 
