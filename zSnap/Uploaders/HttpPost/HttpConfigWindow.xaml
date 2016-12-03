@@ -43,7 +43,7 @@
         <GroupBox x:Name="FilenameGrouBox"  Header="Filename Generation"  Margin="10,405,10,0" BorderBrush="#FFBBBBBB" Height="70" VerticalAlignment="Top">
             <Grid>
                 <Label Margin="0,10,5,5" Foreground="#FF444444"  VerticalAlignment="Top" HorizontalAlignment="Left">Length</Label>
-                <TextBox x:Name="FilenameLengthTbx" Height="23" VerticalAlignment="Top" Margin="70,10,10,10" Text="0" TextChanged="FileNameLengthTextChangedHandler" />
+                <TextBox x:Name="FilenameLengthTbx" Height="23" VerticalAlignment="Top" Margin="70,10,10,10" TextChanged="FileNameLengthTextChangedHandler" />
             </Grid>
         </GroupBox>
 
