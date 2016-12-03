@@ -131,7 +131,8 @@ namespace zSnap.Uploaders.HttpPost
 
         private void ResetClickedHandler(object sender, RoutedEventArgs e)
         {
-            UserTBox.Text = PasswordTBox.Text = EndpointTBox.Text = RegexTBox.Text = "";
+            UserTBox.Text = PasswordTBox.Text = EndpointTBox.Text = RegexTBox.Text = UrlTBox.Text = "";
+	        FilenameLengthTbx.Text = "5";
             UseAuthCheckBox.IsChecked = true;
             UseRegexCheckBox.IsChecked = false;
         }
