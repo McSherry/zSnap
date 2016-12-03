@@ -90,22 +90,22 @@ namespace zSnap.Uploaders.HttpPost
         // The method to be used to determine the URL
         public static string ImageUrlMethod { get { return storageNamespace["imageUrl"]; } set { storageNamespace["imageUrl"] = value; } }
 
-	    public static int FilenameLength
-	    {
-		    get
-		    {
-			    int val;
-			    if (storageNamespace.RetrieveSafe("filenameLength", out val))
-			    {
-				    return val;
-			    }
-			    else
-			    {
-				    storageNamespace["filenameLength"] = 5.ToString();
-				    return 5;
-			    }
-		    }
-		    set { storageNamespace["filenameLength"] = value.ToString(); }
-	    }
+        public static int FilenameLength
+        {
+            get
+            {
+                int val;
+                if (storageNamespace.RetrieveSafe("filenameLength", out val))
+                {
+                    return val;
+                }
+                else
+                {
+                    storageNamespace["filenameLength"] = 5.ToString();
+                    return 5;
+                }
+            }
+            set { storageNamespace["filenameLength"] = value.ToString(); }
+        }
     }
 }
