@@ -37,20 +37,20 @@ namespace zSnap.Uploaders.HttpPost
 
         public static string Password { get { return storageNamespace["password"]; } set { storageNamespace["password"] = value; } }
 
-        // If true, ignores the credentials and prevents them from being sent.
+        // If false, ignores the credentials and prevents them from being sent.
         public static bool UseBasicAuth
         {
             get
             {
                 bool result;
-                if (bool.TryParse(storageNamespace["useBasicAuth"], out result))
+                if (storageNamespace.RetrieveSafe("useBasicAuth", out result))
                 {
                     return result;
                 }
                 else
                 {
-                    storageNamespace["useBasicAuth"] = "False";
-                    return UseBasicAuth;
+                    storageNamespace["useBasicAuth"] = false.ToString();
+                    return false;
                 }
             }
             set { storageNamespace["useBasicAuth"] = value.ToString(); }
