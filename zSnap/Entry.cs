@@ -35,6 +35,33 @@ namespace zSnap
         private static System.Timers.Timer LoadingTimer;
         private static int LoadingTimerCounter;
 
+        /// <summary>
+        /// <para>
+        /// Checks whether there is an update, and prompts the
+        /// user about the update if there is.
+        /// </para>
+        /// </summary>
+        /// <returns>
+        /// Returns the result of the dialog box.
+        /// </returns>
+        private static bool? _checkUpdateAndPrompt()
+        {
+            if (Interop.InternetCheckConnection())
+            {
+                UpdateInfo update;
+                Metadata.CheckNewVersion(out update);
+
+                if (update.IsAvailable)
+                {
+                    var upd = new UI.UpdateAvailableDisplayWindow(update);
+
+                    return upd.ShowDialog();
+                }
+            }
+
+            return null;
+        }
+
         public const string NAMESPACE = "zsnap";
         internal const string 
             SETTING_CAPTUREMODE = "CaptureMode",
@@ -204,19 +231,12 @@ namespace zSnap
                 doCheckUpdates = bool.Parse(DefaultSettings[SETTING_UPDATES]);
             }
 
-            if (doCheckUpdates && Interop.InternetCheckConnection())
-            {
-                Tuple<Uri, Uri, Uri> URIs;
-                if (Metadata.CheckNewVersion(out URIs))
-                {
-                    var upd = new UI.UpdateAvailableDisplayWindow(URIs);
+            if (doCheckUpdates)
+                _checkUpdateAndPrompt();
 
-                    upd.ShowDialog();
-                }
-            }
             #endregion
             #region Set up update timer
-            UpdateTimer = new System.Timers.Timer(1.8e6);
+            UpdateTimer = new System.Timers.Timer(60 * 30 * 1000); // 30min in ms
             UpdateTimer.Elapsed += (s, e) => NotifyContext.Dispatcher.Invoke(() =>
             {
                 Tuple<Uri, Uri, Uri> uris;
@@ -232,7 +252,9 @@ namespace zSnap
                     }
                 }
             });
-            if (doCheckUpdates) UpdateTimer.Start();
+
+            if (doCheckUpdates)
+                UpdateTimer.Start();
             #endregion
 
             NotifyContext = new UI.NotificationContextWindow();

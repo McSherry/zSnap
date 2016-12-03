@@ -105,10 +105,11 @@ namespace zSnap.UI.Settings
 
         private void UpdateCheck_Click(object sender, RoutedEventArgs e)
         {
-            Tuple<Uri, Uri, Uri> uris;
-            if (Metadata.CheckNewVersion(out uris))
+            UpdateInfo update;
+            Metadata.CheckNewVersion(out update);
+            if (update.IsAvailable)
             {
-                new UpdateAvailableDisplayWindow(uris).ShowDialog();
+                new UpdateAvailableDisplayWindow(update).ShowDialog();
             }
             else
             {

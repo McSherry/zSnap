@@ -36,18 +36,25 @@ namespace zSnap.UI
     /// </summary>
     public partial class UpdateAvailableDisplayWindow : Window
     {
-        private readonly Tuple<Uri, Uri, Uri> URIs;
+
+
+        private readonly UpdateInfo URIs;
 
         public UpdateAvailableDisplayWindow()
         {
             InitializeComponent();
         }
 
-        public UpdateAvailableDisplayWindow(Tuple<Uri, Uri, Uri> updateLinks)
+        public UpdateAvailableDisplayWindow(UpdateInfo info)
+            : this()
         {
-            InitializeComponent();
+            this.URIs = info;
+        }
 
-            this.URIs = updateLinks;
+        public UpdateAvailableDisplayWindow(Tuple<Uri, Uri, Uri> updateLinks)
+            : this(UpdateInfo.Map(updateLinks))
+        {
+
         }
 
         private void LoadedHandler(object sender, RoutedEventArgs e)
@@ -63,13 +70,13 @@ namespace zSnap.UI
 
         private void InstallClickedHandler(object sender, RoutedEventArgs e)
         {
-            Process.Start(this.URIs.Item2.ToString());
+            Process.Start(this.URIs.InstallerLocation.ToString());
             Entry.Quit();
         }
 
         private void NotesClickedHandler(object sender, RoutedEventArgs e)
         {
-            Process.Start(this.URIs.Item3.ToString());
+            Process.Start(this.URIs.ReleaseNotesLocation.ToString());
         }
 
         private void CancelClickedHandler(object sender, RoutedEventArgs e)
