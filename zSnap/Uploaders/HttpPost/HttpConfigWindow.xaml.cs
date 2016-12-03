@@ -23,11 +23,15 @@ namespace zSnap.Uploaders.HttpPost
     /// </summary>
     public partial class HttpConfigWindow : Window
     {
+        private int lastAllowedFileNameLength;
+
         public HttpConfigWindow()
         {
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
             InitializeComponent();
+            lastAllowedFileNameLength = Configuration.FilenameLength;
+            FilenameLengthTbx.Text = Configuration.FilenameLength.ToString();
             UseAuthCheckBox.IsChecked = Configuration.UseBasicAuth;
             AuthGroupBox.IsEnabled = Configuration.UseBasicAuth;
             UserTBox.Text = Configuration.Username;
@@ -116,6 +120,7 @@ namespace zSnap.Uploaders.HttpPost
             Configuration.Regex = RegexTBox.Text;
             Configuration.CustomUrl = UrlTBox.Text;
             Configuration.ImageUrlMethod = GetImageUrlMethod();
+            Configuration.FilenameLength = lastAllowedFileNameLength;
             Close();
         }
 
@@ -129,6 +134,27 @@ namespace zSnap.Uploaders.HttpPost
             UserTBox.Text = PasswordTBox.Text = EndpointTBox.Text = RegexTBox.Text = "";
             UseAuthCheckBox.IsChecked = true;
             UseRegexCheckBox.IsChecked = false;
+        }
+
+        private void FileNameLengthTextChangedHandler(object sender, TextChangedEventArgs e)
+        {
+            int res;
+            if (int.TryParse(FilenameLengthTbx.Text, out res))
+            {
+                lastAllowedFileNameLength = res;
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(FilenameLengthTbx.Text))
+                {
+                    lastAllowedFileNameLength = 0;
+                    FilenameLengthTbx.Text = "";
+                }
+                else
+                {
+                    FilenameLengthTbx.Text = lastAllowedFileNameLength.ToString();
+                }
+            }
         }
     }
 }

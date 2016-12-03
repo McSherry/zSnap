@@ -30,12 +30,15 @@ namespace zSnap.Uploaders.HttpPost
 {
     public class HttpPostUploader : ImageUploader, IConfigurableUploader
     {
-        public new Image Image { get; private set; }
+        public new Image Image { get; }
 
-        public HttpPostUploader()
-        {
+        public override string Name => "HTTP Basic Auth Image Uploader";
 
-        }
+        public override string ServiceName => "Custom HTTP Server";
+
+        public Window Window { get; } = new HttpConfigWindow();
+
+        private const int MAX_FILENAME_GENERATION_ATTEMPTS = 10;
 
         private static string RandomString(int length = 10)
         {
@@ -43,6 +46,9 @@ namespace zSnap.Uploaders.HttpPost
             const string validChars = "abcdefghijklmnopqrstuvwxyz0123456789";
             return new string(new char[length].Select(c => c = validChars[rand.Next(0, validChars.Length)]).ToArray());
         }
+
+        //
+        public HttpPostUploader() { }
 
         public HttpPostUploader(Image image)
         {
@@ -55,13 +61,32 @@ namespace zSnap.Uploaders.HttpPost
 
             string username = null;
             string password = null;
-            string filename = RandomString() + ".png";
 
             if (Configuration.UseBasicAuth)
             {
                 username = Configuration.Username;
                 password = Configuration.Password;
             }
+
+            // TLSv1.1 and TLSv1.2 are disabled by default, which causes problems with newer
+            // web servers that don't support TLSv1.0 or older, so let's enable them.
+            var previousSecurityProtocol = ServicePointManager.SecurityProtocol;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+
+            var attempt = 0;
+            var filename = "";
+            do
+            {
+                // Ensure we don't end up in an endless loop if IsFileUnique() always returns false.
+                if (++attempt > MAX_FILENAME_GENERATION_ATTEMPTS)
+                {
+                    Notifications.Raise($"Unable to generate a unique filename.\nA file named '{filename}' already exists.", NotificationType.Error);
+                    location = null;
+                    return false;
+                }
+                filename = RandomString(Configuration.FilenameLength) + ".png";
+            } while (!IsFileUnique(filename));
+
             switch (Configuration.UploadMethod)
             {
                 case "POST":
@@ -75,6 +100,9 @@ namespace zSnap.Uploaders.HttpPost
                     location = null;
                     return false;
             }
+            // We're done uploading; reset the SecurityProtocol to its previous settings.
+            ServicePointManager.SecurityProtocol = previousSecurityProtocol;
+
             try
             {
                 response.EnsureSuccessStatusCode();
@@ -85,15 +113,60 @@ namespace zSnap.Uploaders.HttpPost
                 location = null;
                 return false;
             }
-            var result = response.Content.ReadAsStringAsync().Result;
+            return GetFilename(response, filename, out location);
+        }
 
+        /// <summary>
+        /// Determines whether a filename is unique, to prevent it from being overwritten
+        /// when an image is uploaded under that filename.
+        /// </summary>
+        /// <param name="filename">The filename to check.</param>
+        /// <returns>True if no file with the specified name exists,
+        /// or False if a file with that name does exist.</returns>
+        private bool IsFileUnique(string filename)
+        {
+            Uri location;
+            switch (Configuration.ImageUrlMethod)
+            {
+                // If ImageUrlMethod is not defined, the user will be warned about this later,
+                // so no action needs to be taken.
+                default:
+                    return true;
+                // If the filename is returned in the response, we can assume that the server will
+                // generate it, and therefore, that there's no risk of accidentally overwriting
+                // an existing file.
+                case "FromResponse":
+                    return true;
+                case "FromRequest":
+                    location = new Uri(Configuration.Destination + filename);
+                    break;
+                case "CustomUrl":
+                    location = GetCustomUrl(filename);
+                    break;
+
+            }
+            using (var client = new HttpClient())
+            {
+                var response = client.SendAsync(new HttpRequestMessage(HttpMethod.Head, location)).Result;
+                return !response.IsSuccessStatusCode;
+            }
+        }
+
+        private Uri GetCustomUrl(string filename)
+        {
+            return new Uri(Configuration.CustomUrl.Replace("$filename", filename));
+        }
+
+        private bool GetFilename(HttpResponseMessage response, string uploadedFileName, out Uri location)
+        {
+            var responseText = response.Content.ReadAsStringAsync().Result;
             switch (Configuration.ImageUrlMethod)
             {
                 case "FromResponse":
                     if (Configuration.UseRegex)
                     {
                         var rgx = new Regex(Configuration.Regex);
-                        var match = rgx.Match(result);
+                        var match = rgx.Match(responseText);
                         if (match.Success)
                         {
                             location = new Uri(match.Groups["url"].Value);
@@ -101,7 +174,7 @@ namespace zSnap.Uploaders.HttpPost
                         }
                         else
                         {
-                            Clipboard.SetText(result);
+                            Clipboard.SetText(responseText);
                             Notifications.Raise(
                                 "Unable to parse the image URL from the response.\nPress Ctrl+V to paste the full response returned by the server.",
                                 NotificationType.Error);
@@ -111,18 +184,18 @@ namespace zSnap.Uploaders.HttpPost
                     }
                     else
                     {
-                        location = new Uri(result);
+                        location = new Uri(responseText);
                         return true;
                     }
                 case "FromRequest":
                     location = response.RequestMessage.RequestUri;
                     return true;
                 case "CustomUrl":
-                    location = new Uri(Configuration.CustomUrl.Replace("$filename", filename));
+                    location = GetCustomUrl(uploadedFileName);
                     return true;
                 default:
                     location = null;
-                    Clipboard.SetText(result);
+                    Clipboard.SetText(responseText);
                     Notifications.Raise(
                         "You must configure an image URL to get the URL on your clipboard. Press Ctrl+V to paste the full response returned by the server.",
                         NotificationType.Error);
@@ -150,7 +223,7 @@ namespace zSnap.Uploaders.HttpPost
         /// <param name="remoteHost">The URL to send the request to</param>
         /// <param name="username">The username, or null if auth should not be used.</param>
         /// <param name="token">The token or password, or null if auth should not be used.</param>
-        /// <returns></returns>
+        /// <returns>The HTTP response generated by the server</returns>
         public static HttpResponseMessage UploadFile(Image image, string filename, string remoteHost, string username, string token)
         {
             bool useAuth;
@@ -192,7 +265,7 @@ namespace zSnap.Uploaders.HttpPost
         /// <param name="remoteHost">The URL to send the request to</param>
         /// <param name="username">The username, or null if auth should not be used.</param>
         /// <param name="token">The token or password, or null if auth should not be used.</param>
-        /// <returns></returns>
+        /// <returns>The HTTP response generated by the server</returns>
         public static HttpResponseMessage PutFile(Image image, string filename, string remoteHost, string username, string token)
         {
             var useAuth = true;
@@ -207,18 +280,12 @@ namespace zSnap.Uploaders.HttpPost
 
             using (var client = new HttpClient())
             {
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
                 if (useAuth)
                 {
                     var credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + token));
                     client.DefaultRequestHeaders.Add("Authorization", "Basic " + credentials);
                 }
 
-                var status = client.SendAsync(new HttpRequestMessage(new HttpMethod("PROPFIND"), remoteHost + filename)).Result;
-                if (status.StatusCode != HttpStatusCode.NotFound)
-                {
-                    throw new ArgumentException($"A file named {filename} already exists.");
-                }
                 var ms = new MemoryStream();
                 image.Save(ms, ImageFormat.Png);
                 ms.Position = 0;
@@ -227,17 +294,5 @@ namespace zSnap.Uploaders.HttpPost
                 return response;
             }
         }
-
-        public override string Name
-        {
-            get { return "HTTP Basic Auth Image Uploader"; }
-        }
-
-        public override string ServiceName
-        {
-            get { return "Custom HTTP Server"; }
-        }
-
-        public Window Window { get { return new HttpConfigWindow(); } }
     }
 }
