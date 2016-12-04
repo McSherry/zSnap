@@ -69,6 +69,41 @@ namespace zSnap
                 notes:      tpl.Item3
                 );
         }
+        /// <summary>
+        /// <para>
+        /// Maps an <see cref="UpdateInfo"/> to a 
+        /// <see cref="Tuple{T1, T2, T3}"/>.
+        /// </para>
+        /// </summary>
+        /// <param name="info">
+        /// The <see cref="UpdateInfo"/> to map to a tuple.
+        /// </param>
+        /// <returns>
+        /// A three-tuple of <see cref="Uri"/>s, with the first item
+        /// being the archive location, the second the installer location,
+        /// and the third the release notes location.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown if the <see cref="IsAvailable"/> property of
+        /// <paramref name="info"/> is false.
+        /// </exception>
+        public static Tuple<Uri, Uri, Uri> Unmap(UpdateInfo info)
+        {
+            if (!info.IsAvailable)
+            {
+                throw new ArgumentException(
+                    paramName:  nameof(info),
+                    message:    "The provided UpdateInfo did not contain " +
+                                "information to map to a Tuple<Uri, Uri, Uri>."
+                    );
+            }
+
+            return Tuple.Create(
+                item1: info.ArchiveLocation,
+                item2: info.InstallerLocation,
+                item3: info.ReleaseNotesLocation
+                );
+        }
 
         /// <summary>
         /// <para>
@@ -252,7 +287,7 @@ namespace zSnap
         /// The current minor version.
         /// </para>
         /// </summary>
-        public static int MinorVersion => 99;
+        public static int MinorVersion => 2;
         /// <summary>
         /// <para>
         /// The current patch version.
@@ -373,67 +408,22 @@ namespace zSnap
         /// </para>
         /// </returns>
         [Obsolete(message: "Use Metadata.CheckNewVersion(out UpdateInfo) instead.",
-                  error:   false)]
+                  error:   true)]
         public static bool CheckNewVersion(out Tuple<Uri, Uri, Uri> URIs)
         {
-            URIs = null;
+            UpdateInfo update;
+            CheckNewVersion(out update);
 
-            if (!Interop.InternetCheckConnection()) return false;
+            if (update.IsAvailable)
+            {
+                URIs = UpdateInfo.Unmap(update);
+            }
             else
             {
-                byte[] vsBytes = Encoding.ASCII.GetBytes(FullVersionString);
-                byte[] hashBytes;
-
-                using (var crypto = new SHA1CryptoServiceProvider())
-                {
-                    hashBytes = crypto.ComputeHash(vsBytes);
-                }
-
-                string hexits = String.Join(String.Empty, hashBytes.Select(b => b.ToString("x2")));
-
-                try
-                {
-                    HttpWebRequest webreq = WebRequest.CreateHttp(
-                        UPDATE_CHECK_URI + "?hash=" + hexits
-                    );
-                    HttpWebResponse webres = webreq.GetResponse() as HttpWebResponse;
-
-                    string xml;
-                    using (var sr = new System.IO.StreamReader(webres.GetResponseStream()))
-                    {
-                        xml = sr.ReadToEnd();
-                    }
-
-                    XmlDocument xmd = new XmlDocument();
-                    xmd.LoadXml(xml);
-
-                    bool success = bool.Parse(xmd["data"].Attributes["success"].Value);
-
-                    if (!success) return false;
-                    else
-                    {
-                        bool upAv = bool.Parse(xmd["data"]["update"].Attributes["available"].Value);
-
-                        if (upAv)
-                        {
-                            Tuple<Uri, Uri, Uri> uris = new Tuple<Uri, Uri, Uri>
-                            (
-                                new Uri(xmd["data"]["update"].Attributes["archive"].Value),
-                                new Uri(xmd["data"]["update"].Attributes["install"].Value),
-                                new Uri(xmd["data"]["update"].Attributes["notes"].Value)
-                            );
-
-                            URIs = uris;
-                        }
-
-                        return upAv;
-                    }
-                }
-                catch (WebException)
-                {
-                    return false;
-                }
+                URIs = null;
             }
+
+            return update.IsAvailable;
         }
         /// <summary>
         /// <para>
@@ -446,7 +436,7 @@ namespace zSnap
         /// </para>
         /// </returns>
         [Obsolete(message: "Use Metadata.CheckNewVersion(out UpdateInfo) instead.",
-                  error: false)]
+                  error:   true)]
         public static bool CheckNewVersion()
         {
             Tuple<Uri, Uri, Uri> val;
