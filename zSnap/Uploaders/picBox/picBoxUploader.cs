@@ -125,7 +125,7 @@ namespace zSnap.Uploaders.picBox
                     var task = hcl.GetAsync(
                         String.Format(
                             "{0}?client_id={1}&client_secret={2}&pin={3}",
-                            API_PA_TOKEN, Keys.PICBOX_CLIENT_ID, Keys.PICBOX_CLIENT_SECRET,
+                            API_PA_TOKEN, ApiKeys.PICBOX_CLIENT_ID, ApiKeys.PICBOX_CLIENT_SECRET,
                             pin
                         )
                     );

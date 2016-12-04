@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 namespace zSnap
 {
-    internal static class Keys
+    internal static class ApiKeys
     {
         #warning Remember to set your API keys.
 

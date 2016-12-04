@@ -49,7 +49,7 @@ namespace zSnap.Uploaders.picBox
                 String.Format(
                     "{0}?client_id={1}",
                     picBoxUploader.API_PA_PIN,
-                    Keys.PICBOX_CLIENT_ID
+                    ApiKeys.PICBOX_CLIENT_ID
                 )
             );
         }

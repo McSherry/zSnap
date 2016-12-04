@@ -162,7 +162,7 @@ namespace zSnap
             #endregion
 
             #region Check API keys
-            var keys = typeof(Keys)
+            var keys = typeof(ApiKeys)
                 .GetFields()
                 .Where(f => f.FieldType == typeof(string));
 

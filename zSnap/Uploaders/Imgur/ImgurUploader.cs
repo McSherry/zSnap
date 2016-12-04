@@ -313,7 +313,7 @@ namespace zSnap.Uploaders.Imgur
                     sw.Write(
                         String.Format(
                             "client_id={0}&client_secret={1}&grant_type={2}&pin={3}",
-                            Keys.IMGURv3_CLIENT_ID, Keys.IMGURv3_CLIENT_SECRET, API_OA_GRANTTYPE, pin
+                            ApiKeys.IMGURv3_CLIENT_ID, ApiKeys.IMGURv3_CLIENT_SECRET, API_OA_GRANTTYPE, pin
                         )
                     );
                 }
@@ -361,7 +361,7 @@ namespace zSnap.Uploaders.Imgur
                     sw.Write(
                         String.Format(
                             "client_id={0}&client_secret={1}&grant_type={2}&refresh_token={3}",
-                            Keys.IMGURv3_CLIENT_ID, Keys.IMGURv3_CLIENT_SECRET, "refresh_token",
+                            ApiKeys.IMGURv3_CLIENT_ID, ApiKeys.IMGURv3_CLIENT_SECRET, "refresh_token",
                             Settings[SETTING_AUTHREFRESH]
                         )
                     );
@@ -482,7 +482,7 @@ namespace zSnap.Uploaders.Imgur
             }
             else
             {
-                this.Request.Headers["Authorization"] = String.Format("Client-ID {0}", Keys.IMGURv3_CLIENT_ID);
+                this.Request.Headers["Authorization"] = String.Format("Client-ID {0}", ApiKeys.IMGURv3_CLIENT_ID);
             }
             
 

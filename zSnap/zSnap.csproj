@@ -155,7 +155,7 @@
     <Compile Include="Captors\AreaCaptor\AreaCaptureWindow.xaml.cs">
       <DependentUpon>AreaCaptureWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Keys.cs" />
+    <Compile Include="ApiKeys.cs" />
     <Compile Include="Metadata.cs" />
     <Compile Include="UI\ImageLogWindow.xaml.cs">
       <DependentUpon>ImageLogWindow.xaml</DependentUpon>

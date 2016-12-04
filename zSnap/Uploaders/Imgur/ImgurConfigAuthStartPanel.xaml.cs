@@ -45,7 +45,7 @@ namespace zSnap.Uploaders.Imgur
             System.Diagnostics.Process.Start(
                 String.Format(
                     "{0}/authorize?client_id={1}&response_type={2}",
-                    ImgurUploader.API_OA_BASE, Keys.IMGURv3_CLIENT_ID,
+                    ImgurUploader.API_OA_BASE, ApiKeys.IMGURv3_CLIENT_ID,
                     ImgurUploader.API_OA_GRANTTYPE
                 )
             );
