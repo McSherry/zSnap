@@ -134,6 +134,8 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\Common\DisposableSkeleton.cs" />
+    <Compile Include="API\Common\HotKey.cs" />
     <Compile Include="API\IConfigurableUploader.cs" />
     <Compile Include="API\ImageCaptor.cs" />
     <Compile Include="API\ImageUploader.cs" />
