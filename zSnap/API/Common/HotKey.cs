@@ -48,13 +48,32 @@ namespace zSnap.API.Common
             [StructLayout(LayoutKind.Sequential)]
             private struct WNDCLASS
             {
+                public WNDCLASS(
+                    uint style, WindowProcedure wndProc, int classExtra,
+                    int windowExtra, IntPtr instanceHandle, IntPtr iconHandle,
+                    IntPtr cursorHandle, IntPtr backgroundHandle, 
+                    string menuName, string className
+                    )
+                {
+                    this.Style              = style;
+                    this.WndProc            = wndProc;
+                    this.ClassExtra         = classExtra;
+                    this.WindowExtra        = windowExtra;
+                    this.InstanceHandle     = instanceHandle;
+                    this.IconHandle         = iconHandle;
+                    this.CursorHandle       = cursorHandle;
+                    this.BackgroundHandle   = backgroundHandle;
+                    this.MenuName           = menuName;
+                    this.ClassName          = className;
+                }
+
                 /// <summary>
                 /// <para>
                 /// The class styles to be applied to windows of 
                 /// this class.
                 /// </para>
                 /// </summary>
-                public uint             Style;
+                public readonly uint             Style;
                 /// <summary>
                 /// <para>
                 /// The procedure that will handle messages for
@@ -62,42 +81,42 @@ namespace zSnap.API.Common
                 /// </para>
                 /// </summary>
                 [MarshalAs(UnmanagedType.FunctionPtr)]
-                public WindowProcedure  WndProc;
+                public readonly WindowProcedure WndProc;
                 /// <summary>
                 /// <para>
                 /// The number of extra bytes to be allocated after
                 /// this structure.
                 /// </para>
                 /// </summary>
-                public int              ClassExtra;
+                public readonly int             ClassExtra;
                 /// <summary>
                 /// <para>
                 /// The number of extra bytes to be allocated after
                 /// the window instance.
                 /// </para>
                 /// </summary>
-                public int              WindowExtra;
+                public readonly int             WindowExtra;
                 /// <summary>
                 /// <para>
                 /// A handle to the module that is registering the
                 /// class.
                 /// </para>
                 /// </summary>
-                public IntPtr           InstanceHandle;
+                public readonly IntPtr          InstanceHandle;
                 /// <summary>
                 /// <para>
                 /// A handle to the icon used for the class, or
                 /// <see cref="IntPtr.Zero"/> for the default icon.
                 /// </para>
                 /// </summary>
-                public IntPtr           IconHandle;
+                public readonly IntPtr          IconHandle;
                 /// <summary>
                 /// <para>
                 /// A handle to the cursor used for the class, or
                 /// <see cref="IntPtr.Zero"/> for the default cursor.
                 /// </para>
                 /// </summary>
-                public IntPtr           CursorHandle;
+                public readonly IntPtr          CursorHandle;
                 /// <summary>
                 /// <para>
                 /// A handle to the class background painter (brush),
@@ -105,22 +124,23 @@ namespace zSnap.API.Common
                 /// its own background.
                 /// </para>
                 /// </summary>
-                public IntPtr           BackgroundHandle;
+                public readonly IntPtr          BackgroundHandle;
                 /// <summary>
                 /// <para>
                 /// The resource name of the menu for the class, or
-                /// <see cref="IntPtr.Zero"/> if there is no default
-                /// menu.
+                /// null if there is no default menu.
                 /// </para>
                 /// </summary>
-                public string           MenuName;
+                [MarshalAs(UnmanagedType.LPTStr)]
+                public readonly string          MenuName;
                 /// <summary>
                 /// <para>
                 /// The name to register for this window class, or
                 /// an atom identifying another class.
                 /// </para>
                 /// </summary>
-                public string           ClassName;
+                [MarshalAs(UnmanagedType.LPTStr)]
+                public readonly string          ClassName;
             }
 
             /// <summary>
@@ -190,11 +210,59 @@ namespace zSnap.API.Common
             private static IntPtr _hWnd;
             /// <summary>
             /// <para>
+            /// A list of all hot key callbacks for hot keys registered
+            /// through this class.
+            /// </para>
+            /// </summary>
+            /// <remarks>
+            /// Indices are zero-based by order of registration. To find
+            /// the index of a hot key callback, take the value of the
+            /// <c>wparam</c> parameter and subtract <see cref="_hWnd"/>.
+            /// </remarks>
+            private static IList<Action> _hkCallbacks;
+
+            /// <summary>
+            /// <para>
             /// The struct containing information on the window class of the
             /// window created to receive hot key notifications.
             /// </para>
             /// </summary>
-            private static WNDCLASS _wndClass;
+            private static readonly WNDCLASS _wndClass;
+
+            static HotKeyDispatcher()
+            {
+                _wndClass = new WNDCLASS
+                (
+                    style:              0,
+                    wndProc:            HotKeyDispatcher.HandleMessages,
+                    classExtra:         0,
+                    windowExtra:        0,
+                    instanceHandle:     Interop.ModuleHandle,
+                    iconHandle:         IntPtr.Zero, // NULL
+                    cursorHandle:       IntPtr.Zero, // NULL
+                    backgroundHandle:   IntPtr.Zero, // NULL
+                    menuName:           null,
+                    className:          typeof(WNDCLASS).AssemblyQualifiedName
+                );
+            }
+
+            /// <summary>
+            /// <para>
+            /// Handles messages for the window to which <see cref="_hWnd"/> is
+            /// a handle, and calls the callbacks for hot key activations.
+            /// </para>
+            /// </summary>
+            /// <param name="handle"></param>
+            /// <param name="message"></param>
+            /// <param name="wparam"></param>
+            /// <param name="lparam"></param>
+            /// <returns></returns>
+            private static IntPtr HandleMessages(
+                IntPtr handle, uint message, UIntPtr wparam, IntPtr lparam
+                )
+            {
+                return DefWindowProc(handle, message, wparam, lparam);
+            }
 
             [DllImport(dllName: "user32.dll",
                        CallingConvention = CallingConvention.Winapi,
