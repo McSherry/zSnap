@@ -210,8 +210,8 @@ namespace zSnap.API.Common
             private static IntPtr _hWnd;
             /// <summary>
             /// <para>
-            /// A list of all hot key callbacks for hot keys registered
-            /// through this class.
+            /// All hot key callbacks for hot keys registered through this
+            /// class, keyed by the hot key identifier.
             /// </para>
             /// </summary>
             /// <remarks>
@@ -219,7 +219,7 @@ namespace zSnap.API.Common
             /// the index of a hot key callback, take the value of the
             /// <c>wparam</c> parameter and subtract <see cref="_hWnd"/>.
             /// </remarks>
-            private static IList<Action> _hkCallbacks;
+            private static IDictionary<int, Action> _hkCallbacks;
 
             /// <summary>
             /// <para>
@@ -227,14 +227,14 @@ namespace zSnap.API.Common
             /// window created to receive hot key notifications.
             /// </para>
             /// </summary>
-            private static readonly WNDCLASS _wndClass;
+            private static WNDCLASS _wndClass;
 
             static HotKeyDispatcher()
             {
                 _wndClass = new WNDCLASS
                 (
                     style:              0,
-                    wndProc:            HotKeyDispatcher.HandleMessages,
+                    wndProc:            HotKeyDispatcher._HandleMessages,
                     classExtra:         0,
                     windowExtra:        0,
                     instanceHandle:     Interop.ModuleHandle,
@@ -257,11 +257,56 @@ namespace zSnap.API.Common
             /// <param name="wparam"></param>
             /// <param name="lparam"></param>
             /// <returns></returns>
-            private static IntPtr HandleMessages(
+            private static IntPtr _HandleMessages(
                 IntPtr handle, uint message, UIntPtr wparam, IntPtr lparam
                 )
             {
-                return DefWindowProc(handle, message, wparam, lparam);
+                // If a hot key is activated, handle it.
+                if (message == WM_HOTKEY)
+                {
+                    throw new NotImplementedException();
+                }
+                // Otherwise, we don't care. Delegate to the default
+                // procedure supplied by Win32.
+                else
+                {
+                    return DefWindowProc(handle, message, wparam, lparam);
+                }
+            }
+
+            /// <summary>
+            /// <para>
+            /// Initialises the <see cref="HotKeyDispatcher"/> class if it
+            /// isn't already initialised.
+            /// </para>
+            /// </summary>
+            private static void _Init()
+            {
+                // If not null, the class is already configured.
+                if (_hkCallbacks != null)
+                    return;
+
+                // Register the class we'll use for the hot key window,
+                // and receive an atom uniquely identifying that class.
+                var atom = RegisterClass(ref _wndClass);
+
+                _hWnd = CreateWindow(
+                    className:  _wndClass.ClassName,
+                    windowName: String.Empty,
+                    style:      0,
+                    x:          0,
+                    y:          0,
+                    width:      0,
+                    height:     0,
+                    parent:     IntPtr.Zero, // NULL
+                    menu:       IntPtr.Zero, // NULL
+                    instance:   Interop.ModuleHandle,
+                    param:      IntPtr.Zero // NULL
+                    );
+
+                // We're using a dictionary so we can remove items without
+                // modifying indices, which isn't possible with a list.
+                _hkCallbacks = new Dictionary<int, Action>();
             }
 
             [DllImport(dllName: "user32.dll",
@@ -352,6 +397,8 @@ namespace zSnap.API.Common
                 bool noRepeat = true
                 )
             {
+                _Init();
+
                 throw new NotImplementedException();
             }
         }
