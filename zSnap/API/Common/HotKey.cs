@@ -350,7 +350,7 @@ namespace zSnap.API.Common
         /// Creates a hot key fired by the specified key combination.
         /// </para>
         /// </summary>
-        /// <param name="mods">
+        /// <param name="modifiers">
         /// The modifier keys that must be held while entering the
         /// hot key.
         /// </param>
@@ -366,19 +366,19 @@ namespace zSnap.API.Common
         /// True if the hot key was created, false if otherwise.
         /// </returns>
         public static bool TryCreate(
-            ModifierKeys mods, 
+            ModifierKeys modifiers, 
             Key key,
             out HotKey hotKey
             )
         {
-            return TryCreate(mods, key, false, out hotKey);
+            return TryCreate(modifiers, key, false, out hotKey);
         }
         /// <summary>
         /// <para>
         /// Creates a hot key fired by the specified key combination.
         /// </para>
         /// </summary>
-        /// <param name="mods">
+        /// <param name="modifiers">
         /// The modifier keys that must be held while entering the
         /// hot key.
         /// </param>
@@ -398,13 +398,47 @@ namespace zSnap.API.Common
         /// True if the hot key was created, false if otherwise.
         /// </returns>
         public static bool TryCreate(
-            ModifierKeys mods,
+            ModifierKeys modifiers,
             Key key,
             bool noRepeat,
             out HotKey hotKey
             )
         {
-            throw new NotImplementedException();
+            var hk = new HotKey();
+
+            var result = HotKeyDispatcher.Register(
+                modifiers:  modifiers,
+                key:        key,
+                callback:   hk.HandleHotKeyActivation,
+                noRepeat:   noRepeat
+                );
+
+            if (!result.Success)
+            {
+                hotKey = null;
+                return false;
+            }
+
+            hk._hkResult = result;
+
+            hotKey = hk;
+            return true;
+        }
+
+        private HotKeyResult _hkResult;
+
+        /// <summary>
+        /// <para>
+        /// The callback to be passed to <see cref="HotKeyDispatcher.Register"/>
+        /// to handle the activation of a hot key.
+        /// </para>
+        /// </summary>
+        private void HandleHotKeyActivation()
+        {
+            if (this.IsEnabled)
+            {
+                this.Pressed?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         private HotKey()
