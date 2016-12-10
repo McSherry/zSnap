@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace zSnap.API.Common
 {
@@ -201,7 +198,7 @@ namespace zSnap.API.Common
             /// The next value to be used as a hot key identifier.
             /// </para>
             /// </summary>
-            private static uint _hkid;
+            private static int _hkid;
             /// <summary>
             /// <para>
             /// The handle of the window receiving hot key notifications.
@@ -215,7 +212,6 @@ namespace zSnap.API.Common
             /// </para>
             /// </summary>
             private static IDictionary<UIntPtr, Action> _hkCallbacks;
-
             /// <summary>
             /// <para>
             /// The struct containing information on the window class of the
@@ -224,22 +220,13 @@ namespace zSnap.API.Common
             /// </summary>
             private static WNDCLASS _wndClass;
 
-            static HotKeyDispatcher()
-            {
-                _wndClass = new WNDCLASS
-                (
-                    style:              0,
-                    wndProc:            HotKeyDispatcher._HandleMessages,
-                    classExtra:         0,
-                    windowExtra:        0,
-                    instanceHandle:     Interop.ModuleHandle,
-                    iconHandle:         IntPtr.Zero, // NULL
-                    cursorHandle:       IntPtr.Zero, // NULL
-                    backgroundHandle:   IntPtr.Zero, // NULL
-                    menuName:           null,
-                    className:          typeof(WNDCLASS).AssemblyQualifiedName
-                );
-            }
+            /// <summary>
+            /// <para>
+            /// Utility to convert <see cref="Key"/>s to keycodes.
+            /// </para>
+            /// </summary>
+            private static KeyConverter _keyConv;
+
 
             /// <summary>
             /// <para>
@@ -281,6 +268,20 @@ namespace zSnap.API.Common
                 if (_hkCallbacks != null)
                     return;
 
+                _wndClass = new WNDCLASS
+                (
+                    style: 0,
+                    wndProc: HotKeyDispatcher._HandleMessages,
+                    classExtra: 0,
+                    windowExtra: 0,
+                    instanceHandle: Interop.ModuleHandle,
+                    iconHandle: IntPtr.Zero, // NULL
+                    cursorHandle: IntPtr.Zero, // NULL
+                    backgroundHandle: IntPtr.Zero, // NULL
+                    menuName: null,
+                    className: typeof(WNDCLASS).AssemblyQualifiedName
+                );
+
                 // Register the class we'll use for the hot key window,
                 // and receive an atom uniquely identifying that class.
                 var atom = RegisterClass(ref _wndClass);
@@ -302,6 +303,8 @@ namespace zSnap.API.Common
                 // We're using a dictionary so we can remove items without
                 // modifying indices, which isn't possible with a list.
                 _hkCallbacks = new Dictionary<UIntPtr, Action>();
+
+                _keyConv = new KeyConverter();
             }
 
             [DllImport(dllName: "user32.dll",
@@ -392,9 +395,59 @@ namespace zSnap.API.Common
                 bool noRepeat = true
                 )
             {
+                if (callback == null)
+                {
+                    throw new ArgumentNullException(
+                        message:    "The specified callback cannot be null.",
+                        paramName:  nameof(callback)
+                        );
+                }
+
                 _Init();
 
-                throw new NotImplementedException();
+                // MOD_NOREPEAT is passed as a flag in the same parameter
+                // as the modifier keys.
+                var mods = (uint)modifiers | (noRepeat ? MOD_NOREPEAT : 0);
+                // This is probably the proper way to do this, right? I'm
+                // sure it's valid to just cast the Key enumeration, too.
+                var keyCode = (uint)_keyConv.ConvertTo(key, typeof(uint));
+
+                var id = _hkid;
+
+                var success = RegisterHotKey(
+                    handle:     _hWnd,
+                    id:         id,
+                    modifiers:  mods,
+                    vk:         keyCode
+                    );
+
+                // If it doesn't succeed, a default-constructed result will
+                // indicate failure.
+                if (!success)
+                {
+                    return new HotKeyResult();
+                }
+
+                var idAsPtr = new UIntPtr((uint)id);
+
+                // For some reason, a hot key identifier is an int in the
+                // definition of [RegisterHotKey], but is passed in the
+                // 'wparam' parameter of [WndProc], which is an unsigned
+                // type. We're going to cast it here, rather than elsewhere.
+                _hkCallbacks[idAsPtr] = callback;
+
+                _hkid++;
+
+                // The result provides a callback that we're using to allow
+                // unregistration of the hot key.
+                return new HotKeyResult(
+                    new DisposableSkeleton(delegate
+                    {
+                        _hkCallbacks.Remove(idAsPtr);
+
+                        UnregisterHotKey(_hWnd, id);
+                    })
+                );
             }
         }
 
