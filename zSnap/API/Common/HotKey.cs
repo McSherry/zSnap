@@ -214,12 +214,7 @@ namespace zSnap.API.Common
             /// class, keyed by the hot key identifier.
             /// </para>
             /// </summary>
-            /// <remarks>
-            /// Indices are zero-based by order of registration. To find
-            /// the index of a hot key callback, take the value of the
-            /// <c>wparam</c> parameter and subtract <see cref="_hWnd"/>.
-            /// </remarks>
-            private static IDictionary<int, Action> _hkCallbacks;
+            private static IDictionary<UIntPtr, Action> _hkCallbacks;
 
             /// <summary>
             /// <para>
@@ -261,17 +256,17 @@ namespace zSnap.API.Common
                 IntPtr handle, uint message, UIntPtr wparam, IntPtr lparam
                 )
             {
-                // If a hot key is activated, handle it.
-                if (message == WM_HOTKEY)
+                Action callback;
+
+                // If a hot key is activated and we have a callback for it,
+                // call the callback.
+                if (message == WM_HOTKEY && 
+                    _hkCallbacks.TryGetValue(wparam, out callback))
                 {
-                    throw new NotImplementedException();
+                    callback();
                 }
-                // Otherwise, we don't care. Delegate to the default
-                // procedure supplied by Win32.
-                else
-                {
-                    return DefWindowProc(handle, message, wparam, lparam);
-                }
+
+                return DefWindowProc(handle, message, wparam, lparam);
             }
 
             /// <summary>
@@ -306,7 +301,7 @@ namespace zSnap.API.Common
 
                 // We're using a dictionary so we can remove items without
                 // modifying indices, which isn't possible with a list.
-                _hkCallbacks = new Dictionary<int, Action>();
+                _hkCallbacks = new Dictionary<UIntPtr, Action>();
             }
 
             [DllImport(dllName: "user32.dll",
