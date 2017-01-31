@@ -99,6 +99,27 @@ namespace zSnap.API.Notification
             this.Left = left;
             this.Top = top;
 
+            // If the user has DPI scaling settings, these values will be off. We
+            // have to convert the actual X/Y positioning values into a value that
+            // accounts for the scaling.
+            var ps = PresentationSource.FromVisual(this);
+
+            // If the [PresentationSource] we get back is null, then we've already
+            // been disposed and there's no real sensible way of handling this I
+            // can think of.
+            if (ps != null)
+            {
+                var transformer = ps.CompositionTarget.TransformFromDevice;
+
+                var newXY = transformer.Transform(new Point(
+                    x: this.Left,
+                    y: this.Top
+                    ));
+
+                this.Left = newXY.X;
+                this.Top = newXY.Y;
+            }
+
             this.Loaded += (s, e) =>
             {
                 this.hWnd = new WindowInteropHelper(this).Handle;
