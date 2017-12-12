@@ -39,6 +39,8 @@ namespace zSnap.Captors.AreaCaptor
         private IntPtr hWnd;
         private HwndSource hWndSource;
 
+        public Rect CaptureArea { get; private set; }
+
         public AreaCaptureWindow()
         {
             InitializeComponent();
@@ -59,10 +61,31 @@ namespace zSnap.Captors.AreaCaptor
             };
             this.Confirm.MouseUp += (s, e) =>
             {
+                CalculateCaptureArea();
                 this.DialogResult = true;
                 this.Close();
             };
             this.Loaded += LoadedHandler;
+        }
+
+        private void CalculateCaptureArea()
+        {
+            var ps = PresentationSource.FromVisual(this);
+            if (ps?.CompositionTarget != null)
+            {
+                var transformer = ps.CompositionTarget.TransformToDevice;
+
+                var position = transformer.Transform(new Point(
+                    Left + BorderThickness.Left,
+                    Top + BorderThickness.Top));
+                var size = transformer.Transform(new Point(
+                    Width - BorderThickness.Left - BorderThickness.Right,
+                    Height - BorderThickness.Top - BorderThickness.Bottom));
+
+                CaptureArea = new Rect(
+                    new Point(Math.Round(position.X), Math.Round(position.Y)),
+                    new Size(Math.Round(size.X), Math.Round(size.Y)));
+            }
         }
 
         private void LoadedHandler(object sender, EventArgs e)
@@ -75,16 +98,33 @@ namespace zSnap.Captors.AreaCaptor
         private unsafe IntPtr WndProc(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             int lParam32 = lParam.ToInt32();
-            // Absolute (screen-relative) co-ordinates
-            short ax = *(short*)&lParam32, ay = *(((short*)&lParam32) + 1);
-            // Relative (window-relative) co-ordinates
-            int rx = ax - (int)this.Left, ry = ay - (int)this.Top;
+
+            Point absoluteXY = default(Point);
+            Point relativeXY = default(Point);
+
+            var ps = PresentationSource.FromVisual(this);
+
+            // If the [PresentationSource] we get back is null, then we've already
+            // been disposed and there's no real sensible way of handling this I
+            // can think of.
+            if (ps?.CompositionTarget != null)
+            {
+                // Absolute (screen-relative) co-ordinates (in pixels)
+                short ax = *(short*)&lParam32, ay = *(((short*)&lParam32) + 1);
+
+                var transformer = ps.CompositionTarget.TransformFromDevice;
+                // Absolute (screen-relative) co-ordinates (in points)
+                absoluteXY = transformer.Transform(new Point(ax, ay));
+                // Relative (window-relative) co-ordinates
+                relativeXY = new Point(absoluteXY.X - this.Left, absoluteXY.Y - this.Top);
+            }
+
             Point mousePoint = default(Point);
 
             // Message received on mouse-over
             if (msg == Interop.WM_NCHITTEST)
             {
-                mousePoint = new Point(rx, ry);
+                mousePoint = relativeXY;
 
                 if (BRResizer.Within(this, mousePoint))
                 {
@@ -109,7 +149,7 @@ namespace zSnap.Captors.AreaCaptor
             {
                 // WM_LBUTTONDOWN's co-ords are relative to the window,
                 // whereas WM_NCHITTEST's are relative to the screen.
-                mousePoint = new Point(ax, ay);
+                mousePoint = absoluteXY;
 
                 // Make sure we're in the client area of the form.
                 // Our handler above will ensure that we are.
@@ -118,6 +158,8 @@ namespace zSnap.Captors.AreaCaptor
                     == Interop.HTCLIENT
                 )
                 {
+                    ;
+
                     // If we aren't within our two buttons, allow the window to be dragged and
                     // moved by sending the appropriate message.
                     if (!Cancel.Within(this, mousePoint) && !Confirm.Within(this, mousePoint))

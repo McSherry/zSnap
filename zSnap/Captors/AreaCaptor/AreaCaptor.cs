@@ -47,16 +47,13 @@ namespace zSnap.Captors.AreaCaptor
                 // Copies bitmap data from the screen, accounting for the capture window's
                 // 2px-wide borders.
                 Bitmap scBmp = new Bitmap(
-                    (int)acw.Width - (BORDER_WIDTH * 2),
-                    (int)acw.Height - (BORDER_WIDTH * 2),
+                    (int)acw.CaptureArea.Width,
+					(int)acw.CaptureArea.Height,
                     System.Drawing.Imaging.PixelFormat.Format24bppRgb
                 );
                 Graphics scGfx = Graphics.FromImage(scBmp);
                 scGfx.CopyFromScreen(
-                    new Point(
-                        (int)acw.Left + BORDER_WIDTH,
-                        (int)acw.Top + BORDER_WIDTH
-                    ),
+					new Point((int)acw.CaptureArea.Left, (int)acw.CaptureArea.Top),
                     new Point(0, 0),
                     new Size(scBmp.Width, scBmp.Height),
                     CopyPixelOperation.SourceCopy
